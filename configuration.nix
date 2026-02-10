@@ -2,8 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, ... }:
-
+{ config, pkgs, lib, ... }:
 
 
 
@@ -32,6 +31,87 @@
   # Enable networking
   networking.networkmanager.enable = true;
 
+
+
+
+
+
+#nvidia driver + OpenGL
+
+  hardware.graphics = {
+    enable = true;
+    enable32Bit = true;
+  };
+  # hardware.opengl has beed changed to hardware.graphics
+
+  services.xserver.videoDrivers = ["nvidia"];
+
+  hardware.nvidia.modesetting.enable = true;
+hardware.nvidia = {
+  # Required for drivers >= 560
+  open = true; # Set to false if you have an older card
+  package = config.boot.kernelPackages.nvidiaPackages.latest;
+};
+
+#Nvidia prime with sync+offload
+
+hardware.nvidia.prime = {
+    offload = {
+      enable = true;
+      enableOffloadCmd = true;
+    };
+
+    # integrated
+    amdgpuBusId = "PCI:5:0:0";
+    
+    # dedicated
+    nvidiaBusId = "PCI:1:0:0";
+  };
+
+  specialisation = {
+    gaming-time.configuration = {
+
+      hardware.nvidia = {
+        prime.sync.enable = lib.mkForce true;
+        prime.offload = {
+          enable = lib.mkForce false;
+          enableOffloadCmd = lib.mkForce false;
+        };
+      };
+
+    };
+  };
+
+
+#Steam with  gamemode
+ programs.steam.enable = true;
+  programs.steam.gamescopeSession.enable = true;
+
+
+  programs.gamemode.enable = true;
+
+
+
+
+#adds protonup to steam path
+  
+  environment.sessionVariables = {
+    STEAM_EXTRA_COMPAT_TOOLS_PATHS =
+      "\${HOME}/.steam/root/compatibilitytools.d";
+  };
+
+
+#uninstall packages
+
+environment.gnome.excludePackages = with pkgs; [
+  epiphany    # GNOME Web Browser
+  gnome-tour  # GNOME Tour welcome app
+];
+
+
+
+
+
   # Set your time zone.
   time.timeZone = "Asia/Kolkata";
 
@@ -54,7 +134,7 @@
   services.xserver.enable = true;
 
   # Enable the GNOME Desktop Environment.
-  services.xserver.displayManager.gdm.enable = true;
+  services.displayManager.ly.enable = true;
   services.xserver.desktopManager.gnome.enable = true;
 
   # Configure keymap in X11
@@ -109,8 +189,13 @@
 	fastfetch
 	git
 	gh
-	vscode-fhs
+	vscodium
+	python315
+	heroic
+	mangohud
+	protonup-ng
   ];
+
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
