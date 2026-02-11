@@ -18,8 +18,6 @@
 
 
 
-
-
   # Define the mount point for your NTFS HDD
   fileSystems."/mnt/HDD" = {
     device = "/dev/disk/by-uuid/42B40D6CB40D642F";
@@ -237,6 +235,7 @@ environment.gnome.excludePackages = with pkgs; [
 	protonup-ng
 	ntfs3g
 	udisks2
+	(pkgs.callPackage /home/nabil/Documents/Code/nix/nix-pkgs/vantage/vantage.nix {})
   ];
 
 
